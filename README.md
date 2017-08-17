@@ -1,6 +1,8 @@
 # ConditionalGAN-TensorFlow
 An implementation of CGAN using TensorFlow. 
 (still in progress, need to gather some actual interesting image data) 
+## Computation Graph
+![cgan](checkpoints/20170817-0011/ComputationGraph.png)
 
 Test Done:
 Generate 28x28 fake MNIST images.
