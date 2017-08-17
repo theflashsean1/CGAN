@@ -1,3 +1,8 @@
+"""
+Title: Simple MNIST generation with CGAN
+Author: Sheng Jia
+Date: August 17th 2017
+"""
 import tensorflow as tf
 from c_gan_model import CGAN
 from tensorflow.examples.tutorials.mnist import input_data
@@ -21,10 +26,10 @@ tf.flags.DEFINE_integer('ndf', 64, 'number of dis filters in first conv layer')
 tf.flags.DEFINE_integer('ngfc', 784, 'fully connected dimension for generator')
 tf.flags.DEFINE_integer('ndfc', 784, 'fully connected dimension for discriminator')
 tf.flags.DEFINE_string('data_dir', '/tmp/tensorflow/mnist/input_data', 'Directory for storing input data')
-tf.flags.DEFINE_string('load_model', None, 'folder of saved model that you wish to continue training '
+tf.flags.DEFINE_string('load_model', '20170817-0011', 'folder of saved model that you wish to continue training '
                                            '(e.g. 20170602-1936), default=None')
-tf.flags.DEFINE_integer('max_num_steps', 2000, 'Number of steps to train')
-tf.flags.DEFINE_integer('num_steps_run', 200, 'Number of steps to run per this script call')
+tf.flags.DEFINE_integer('max_num_steps', 20000, 'Number of steps to train')
+tf.flags.DEFINE_integer('num_steps_run', 1000, 'Number of steps to run per this script call')
 
 
 def main(_):
@@ -68,7 +73,7 @@ def main(_):
         summary_op = cgan.summary_op
         train_writer = tf.summary.FileWriter(checkpoints_dir, graph)
     # exit()
-    #    saver = tf.train.Saver()
+        saver = tf.train.Saver()
 
     with tf.Session(graph=graph) as sess:
         """
@@ -88,7 +93,7 @@ def main(_):
 
         rel_step = 0
         try:
-            while rel_step < FLAGS.num_steps_run and step < FLAGS.max_num_steps:
+            while rel_step <= FLAGS.num_steps_run and step <= FLAGS.max_num_steps:
                 batch = mnist.train.next_batch(FLAGS.batch_size)
                 x = batch[0].reshape([-1, FLAGS.image_size, FLAGS.image_size, FLAGS.image_channel])
                 y_ = batch[1]
@@ -105,7 +110,7 @@ def main(_):
                 train_writer.flush()
                 print(step)
 
-                if step % 10 == 0:
+                if step % 500 == 0:
                     print('-----------Step %d:-------------' % step)
                     print('  G_loss   : {}'.format(g_loss_val))
                     print('  D(G(Z))_loss : {}'.format(d_loss_fake_val))
@@ -127,18 +132,16 @@ def main(_):
                     plt.savefig('{}/{}.png'.format(checkpoints_dir, str(step).zfill(3)), bbox_inches='tight')
                     plt.close(fig)
 
-                if step % 150 == 0:
-                    print("SAVED")
-                    # save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                    # print("Model saved in file: %s" % save_path)
+                # if step % 150 == 0:
+                #    save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                #    print("Model saved in file: %s" % save_path)
                 rel_step += 1
                 step += 1
         except KeyboardInterrupt:
             print("Manually stopped.")
         finally:
-            print("Done")
-            # save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-            # print("Model saved in file: %s" % save_path)
+            save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+            print("Model saved in file: %s" % save_path)
 
 
 def _plot(samples):
