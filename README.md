@@ -1,7 +1,7 @@
 # ConditionalGAN-TensorFlow
 An implementation of CGAN using TensorFlow. 
 (still in progress, need to gather some actual interesting image data) 
-## Computation Graph
+## Computation Graph (Tensorboard)
 ![cgan](checkpoints/20170817-0011/ComputationGraph.png)
 
 Test Done:
