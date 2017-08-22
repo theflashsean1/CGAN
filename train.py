@@ -26,7 +26,7 @@ tf.flags.DEFINE_integer('ndf', 64, 'number of dis filters in first conv layer')
 tf.flags.DEFINE_integer('ngfc', 784, 'fully connected dimension for generator')
 tf.flags.DEFINE_integer('ndfc', 784, 'fully connected dimension for discriminator')
 tf.flags.DEFINE_string('data_dir', '/tmp/tensorflow/mnist/input_data', 'Directory for storing input data')
-tf.flags.DEFINE_string('load_model', '20170817-0011', 'folder of saved model that you wish to continue training '
+tf.flags.DEFINE_string('load_model', None, 'folder of saved model that you wish to continue training '
                                            '(e.g. 20170602-1936), default=None')
 tf.flags.DEFINE_integer('max_num_steps', 20000, 'Number of steps to train')
 tf.flags.DEFINE_integer('num_steps_run', 1000, 'Number of steps to run per this script call')
@@ -92,6 +92,11 @@ def main(_):
             step = 0
 
         rel_step = 0
+
+        y_samples = np.zeros(shape=[0, 10])
+        for _ in range(10):
+            y_samples = np.vstack([y_samples, np.eye(10)])
+        sample_z = np.random.uniform(-1, 1, [FLAGS.batch_size, FLAGS.z_dim]).astype(np.float32)
         try:
             while rel_step <= FLAGS.num_steps_run and step <= FLAGS.max_num_steps:
                 batch = mnist.train.next_batch(FLAGS.batch_size)
@@ -108,24 +113,16 @@ def main(_):
                 )
                 train_writer.add_summary(summary)
                 train_writer.flush()
-                print(step)
+                print('Step: {}. G_loss:{} D(G(Z))_loss:{} D(X)_loss:{}'.format(step, g_loss_val,
+                                                                                d_loss_fake_val, d_loss_real_val))
 
-                if step % 500 == 0:
-                    print('-----------Step %d:-------------' % step)
-                    print('  G_loss   : {}'.format(g_loss_val))
-                    print('  D(G(Z))_loss : {}'.format(d_loss_fake_val))
-                    print('  D(X)_loss : {}'.format(d_loss_real_val))
+                if step % 50 == 0:
                     print('-----------Sample img----------')
-                    y_samples = np.zeros(shape=[0, 10])
-                    for _ in range(10):
-                        y_samples = np.vstack([y_samples, np.eye(10)])
-                    z_samples = np.random.uniform(-1, 1, [10*10, FLAGS.z_dim]).astype(np.float32)
-
                     g_z = sess.run(
                         fetches=generated_imgs,
                         feed_dict={
                             cgan.y_placeholder: y_samples,
-                            cgan.z_placeholder: z_samples
+                            cgan.z_placeholder: sample_z
                         }
                     )
                     fig = _plot(g_z)

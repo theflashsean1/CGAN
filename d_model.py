@@ -52,9 +52,9 @@ class Discriminator:
                 slope=0.2
             )
             h2 = tf.concat([h2, y], axis=1)  # (100, 794)
-            h3 = tf.nn.sigmoid(
-                ops.fc(h2, 1, reuse=self._reuse, name='d_fc3'),
-            )
+            # h3 = tf.nn.sigmoid(
+            h3 = ops.fc(h2, 1, reuse=self._reuse, name='d_fc3')
+            # )
         self._reuse = True
         return h3  # (100, 1)
 
